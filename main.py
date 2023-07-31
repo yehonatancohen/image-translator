@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from modules import morph
+from modules import morph, helper, otsu
 import pytesseract
 from googletrans import Translator
 
@@ -20,11 +20,6 @@ blurred = cv2.GaussianBlur(gray, (7, 7), 0)
  
 # Performing OTSU threshold
 ret, thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
-#thresh1 = morph.dilate(thresh1)
-#kernel = np.ones((3, 3), 'uint8')
-#thresh1 = cv2.dilate(thresh1, kernel, cv2.BORDER_REFLECT, iterations=1)
-#thresh1 = cv2.erode(thresh1, kernel, cv2.BORDER_REFLECT, iterations=1)
-#print(thresh1)
  
 # Specify structure shape and kernel size.
 # Kernel size increases or decreases the area
@@ -37,8 +32,7 @@ rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18, 18))
 dilation = cv2.dilate(thresh1, rect_kernel, iterations = 1)
  
 # Finding contours
-contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL,
-                                                 cv2.CHAIN_APPROX_NONE)
+contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
 # Create a copy of the original image to draw the contours on
 contour_img = np.copy(img)  # Replace 'original_image' with your input image variable
@@ -70,18 +64,17 @@ for cnt in contours:
      
     # Cropping the text block for giving input to OCR
     cropped = im2[y:y + h, x:x + w]
-     
+
     # Open the file in append mode
     file = open("recognized.txt", "a")
-     
+    
     # Apply OCR on the cropped image
     text = pytesseract.image_to_string(cropped)
+    translated = translator.translate(text, src='en',dest='iw').text
     print(text)
-    print(translator.translate(text, src='en',dest='iw').text)
+    print(translated)
+    cv2.putText(img=img, text=translated, org=(x, y + int(h/2)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 0),thickness=2)
+    cv2.imshow("test",img)
+    cv2.waitKey(0)
      
-    # Appending the text into file
-    #file.write(text)
-    #file.write("\n")
-     
-    # Close the file
     file.close
