@@ -70,8 +70,6 @@ def translage_image(image_path, kernel_size):
         print(translated)
         img = helper.add_text_to_contour(img, translated, cnt)
 
-        file.close
-
     cv2.imwrite("output/" + image_path, img)
     cv2.imshow("Result",img)
     cv2.waitKey(0)
