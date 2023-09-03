@@ -60,9 +60,6 @@ def translage_image(image_path, kernel_size):
         # Cropping the text block for giving input to OCR
         cropped = im2[y:y + h, x:x + w]
 
-        # Open the file in append mode
-        file = open("recognized.txt", "a")
-
         # Apply OCR on the cropped image
         text = pytesseract.image_to_string(cropped)
         if text == "":
